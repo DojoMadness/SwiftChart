@@ -163,6 +163,14 @@ open class Chart: UIControl {
     Alpha component for the area's color.
     */
     open var areaAlphaComponent: CGFloat = 0.1
+    
+    open var zeroXLine: Bool = false
+    
+    open var zeroXLineColor: UIColor = UIColor.gray.withAlphaComponent(0.3)
+    
+    open var zeroXLineWidth: CGFloat = 0.5
+    
+    open var zeroXLineFormatter: ChartLineFormatter = .normal
 
     // MARK: Private variables
 
@@ -299,6 +307,10 @@ open class Chart: UIControl {
         }
 
         drawAxes()
+        
+        if zeroXLine {
+            drawZeroXLine()
+        }
 
         if xLabels != nil || series.count > 0 {
             drawLabelsAndGridOnXAxis()
@@ -487,25 +499,16 @@ open class Chart: UIControl {
         context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
         context.strokePath()
 
-        // horizontal axis when y = 0
-        if min.y < 0 && max.y > 0 {
-            let y = CGFloat(getZeroValueOnYAxis(zeroLevel: 0))
-            context.move(to: CGPoint(x: CGFloat(0), y: y))
-            context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: y))
-            context.strokePath()
-        }
-
         // vertical axis on the left
         context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
         context.addLine(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
         context.strokePath()
 
-
         // vertical axis on the right
         context.move(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
         context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
         context.strokePath()
-
+        
     }
 
     fileprivate func drawLabelsAndGridOnXAxis() {
@@ -628,6 +631,25 @@ open class Chart: UIControl {
 
         UIGraphicsEndImageContext()
 
+    }
+    
+    fileprivate func drawZeroXLine() {
+        
+        let context = UIGraphicsGetCurrentContext()!
+        context.setStrokeColor(zeroXLineColor.cgColor)
+        context.setLineWidth(zeroXLineWidth)
+        
+        let y = CGFloat(getZeroValueOnYAxis(zeroLevel: 0))
+        context.move(to: CGPoint(x: CGFloat(0), y: y))
+        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: y))
+        switch zeroXLineFormatter {
+        case .normal:
+            break
+        case .dashed(let phase, let lenghts):
+            context.setLineDash(phase: phase, lengths: lenghts)
+        }
+        context.strokePath()
+        
     }
 
     // MARK: - Touch events
