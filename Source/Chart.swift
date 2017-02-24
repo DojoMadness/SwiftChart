@@ -117,6 +117,8 @@ open class Chart: UIControl {
     Height of the area at the top of the chart, acting a padding to make place for the top y-axis label.
     */
     open var topInset: CGFloat = 20
+    
+    open var leftInset: CGFloat = 0
 
     /**
     Width of the chart's lines.
@@ -171,6 +173,8 @@ open class Chart: UIControl {
     open var zeroXLineWidth: CGFloat = 0.5
     
     open var zeroXLineFormatter: ChartLineFormatter = .normal
+    
+    open var zeroXLabel: UILabel?
 
     // MARK: Private variables
 
@@ -207,6 +211,9 @@ open class Chart: UIControl {
             drawIBPlaceholder()
             #else
             drawChart()
+            if let zeroXLabel = zeroXLabel {
+                drawZeroXLabel(zeroXLabel)
+            }
         #endif
     }
 
@@ -268,7 +275,7 @@ open class Chart: UIControl {
     fileprivate func drawChart() {
 
         drawingHeight = bounds.height - bottomInset - topInset
-        drawingWidth = bounds.width
+        drawingWidth = bounds.width - leftInset
 
         let minMax = getMinMax()
         min = minMax.min
@@ -432,10 +439,10 @@ open class Chart: UIControl {
         // YValues are "reverted" from top to bottom, so 'above' means <= level
         let isAboveZeroLine = yValues.max()! <= self.scaleValueOnYAxis(series[seriesIndex].colors.zeroLevel)
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: CGFloat(xValues.first!), y: CGFloat(yValues.first!)))
+        path.move(to: CGPoint(x: CGFloat(xValues.first!) + leftInset, y: CGFloat(yValues.first!)))
         for i in 1..<yValues.count {
             let y = yValues[i]
-            path.addLine(to: CGPoint(x: CGFloat(xValues[i]), y: CGFloat(y)))
+            path.addLine(to: CGPoint(x: CGFloat(xValues[i]) + leftInset, y: CGFloat(y)))
         }
 
         let lineLayer = CAShapeLayer()
@@ -462,11 +469,11 @@ open class Chart: UIControl {
         let area = CGMutablePath()
         let zero = CGFloat(getZeroValueOnYAxis(zeroLevel: series[seriesIndex].colors.zeroLevel))
 
-        area.move(to: CGPoint(x: CGFloat(xValues[0]), y: zero))
+        area.move(to: CGPoint(x: CGFloat(xValues[0]) + leftInset, y: zero))
         for i in 0..<xValues.count {
-            area.addLine(to: CGPoint(x: CGFloat(xValues[i]), y: CGFloat(yValues[i])))
+            area.addLine(to: CGPoint(x: CGFloat(xValues[i]) + leftInset, y: CGFloat(yValues[i])))
         }
-        area.addLine(to: CGPoint(x: CGFloat(xValues.last!), y: zero))
+        area.addLine(to: CGPoint(x: CGFloat(xValues.last!) + leftInset, y: zero))
         let areaLayer = CAShapeLayer()
         areaLayer.frame = self.bounds
         areaLayer.path = area
@@ -490,23 +497,23 @@ open class Chart: UIControl {
         context.setLineWidth(0.5)
 
         // horizontal axis at the bottom
-        context.move(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
+        context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: drawingHeight + topInset))
+        context.addLine(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: drawingHeight + topInset))
         context.strokePath()
 
         // horizontal axis at the top
-        context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
+        context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: CGFloat(0)))
+        context.addLine(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: CGFloat(0)))
         context.strokePath()
 
         // vertical axis on the left
-        context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
+        context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: CGFloat(0)))
+        context.addLine(to: CGPoint(x: CGFloat(0) + leftInset, y: drawingHeight + topInset))
         context.strokePath()
 
         // vertical axis on the right
-        context.move(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
+        context.move(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: CGFloat(0)))
+        context.addLine(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: drawingHeight + topInset))
         context.strokePath()
         
     }
@@ -536,8 +543,8 @@ open class Chart: UIControl {
             // Add vertical grid for each label, except axes on the left and right
 
             if x != 0 && x != drawingWidth {
-                context.move(to: CGPoint(x: x, y: CGFloat(0)))
-                context.addLine(to: CGPoint(x: x, y: bounds.height))
+                context.move(to: CGPoint(x: x + leftInset, y: CGFloat(0)))
+                context.addLine(to: CGPoint(x: x + leftInset, y: bounds.height))
                 context.strokePath()
             }
 
@@ -547,7 +554,7 @@ open class Chart: UIControl {
             }
 
             // Add label
-            let label = UILabel(frame: CGRect(x: x, y: drawingHeight, width: 0, height: 0))
+            let label = UILabel(frame: CGRect(x: x + leftInset, y: drawingHeight, width: 0, height: 0))
             label.font = labelFont
             label.text = xLabelsFormatter(i, labels[i])
             label.textColor = labelColor
@@ -600,7 +607,7 @@ open class Chart: UIControl {
             // Add horizontal grid for each label, but not over axes
             if y != drawingHeight + topInset && y != zero {
 
-                context.move(to: CGPoint(x: CGFloat(0), y: y))
+                context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: y))
                 context.addLine(to: CGPoint(x: self.bounds.width, y: y))
                 if labels[i] != 0 {
                     // Horizontal grid for 0 is not dashed
@@ -611,7 +618,7 @@ open class Chart: UIControl {
                 context.strokePath()
             }
 
-            let label = UILabel(frame: CGRect(x: padding, y: y, width: 0, height: 0))
+            let label = UILabel(frame: CGRect(x: padding + leftInset, y: y, width: 0, height: 0))
             label.font = labelFont
             label.text = yLabelsFormatter(i, labels[i])
             label.textColor = labelColor
@@ -640,8 +647,8 @@ open class Chart: UIControl {
         context.setLineWidth(zeroXLineWidth)
         
         let y = CGFloat(getZeroValueOnYAxis(zeroLevel: 0))
-        context.move(to: CGPoint(x: CGFloat(0), y: y))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: y))
+        context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: y))
+        context.addLine(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: y))
         switch zeroXLineFormatter {
         case .normal:
             break
@@ -649,6 +656,16 @@ open class Chart: UIControl {
             context.setLineDash(phase: phase, lengths: lenghts)
         }
         context.strokePath()
+        
+    }
+    
+    fileprivate func drawZeroXLabel(_ label: UILabel) {
+        
+        var frame = label.frame
+        frame.origin.x = 0
+        frame.origin.y = CGFloat(getZeroValueOnYAxis(zeroLevel: 0)) - (frame.height / 2)
+        label.frame = frame
+        addSubview(label)
         
     }
 
@@ -685,9 +702,9 @@ open class Chart: UIControl {
     func handleTouchEvents(_ touches: Set<UITouch>, event: UIEvent!) {
         let point = touches.first!
         let left = point.location(in: self).x
-        let x = valueFromPointAtX(left)
+        let x = valueFromPointAtX(left - leftInset)
 
-        if left < 0 || left > (drawingWidth as CGFloat) {
+        if left < (0 + leftInset) || left > (drawingWidth + leftInset as CGFloat) {
             // Remove highlight line at the end of the touch event
             if let shapeLayer = highlightShapeLayer {
                 shapeLayer.path = nil
