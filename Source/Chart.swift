@@ -174,7 +174,9 @@ open class Chart: UIControl {
     
     open var zeroXLineFormatter: ChartLineFormatter = .normal
     
-    open var zeroXLabel: UILabel?
+    open private(set) var zeroXLabel: UILabel!
+    
+    open var isZeroXLabelHidden: Bool = true
 
     // MARK: Private variables
 
@@ -196,14 +198,20 @@ open class Chart: UIControl {
     override public init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor.clear
+        initialize()
     }
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        initialize()
     }
 
     convenience public init() {
         self.init(frame: CGRect.zero)
+    }
+    
+    private func initialize() {
+        zeroXLabel = UILabel()
     }
 
     override open func draw(_ rect: CGRect) {
@@ -211,9 +219,7 @@ open class Chart: UIControl {
             drawIBPlaceholder()
             #else
             drawChart()
-            if let zeroXLabel = zeroXLabel {
-                drawZeroXLabel(zeroXLabel)
-            }
+            drawZeroXLabel(zeroXLabel)
         #endif
     }
 
@@ -667,6 +673,7 @@ open class Chart: UIControl {
         frame.origin.x = 0
         frame.origin.y = CGFloat(getZeroValueOnYAxis(zeroLevel: zeroLevel)) - (frame.height / 2)
         label.frame = frame
+        label.isHidden = isZeroXLabelHidden
         addSubview(label)
         
     }
