@@ -460,7 +460,7 @@ open class Chart: UIControl {
         } else {
             lineLayer.strokeColor = series[seriesIndex].colors.below.cgColor
         }
-        lineLayer.fillColor = nil
+        lineLayer.fillColor = UIColor.clear.cgColor
         lineLayer.lineWidth = lineWidth
         lineLayer.lineJoin = kCALineJoinBevel
 
