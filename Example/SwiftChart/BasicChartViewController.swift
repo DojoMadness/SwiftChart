@@ -51,7 +51,7 @@ class BasicChartViewController: UIViewController, ChartDelegate {
             // Chart with y-min, y-max and y-labels formatter
             
             
-            let data: Array<Float> = [0, -2, -2, 3, -3, 4, 1, 0, -1]
+            let data: [Float] = [0, -2, -2, 3, -3, 4, 1, 0, -1]
             
             let series = ChartSeries(data)
             series.area = true
@@ -92,6 +92,9 @@ class BasicChartViewController: UIViewController, ChartDelegate {
         
     }
     
+    func didEndTouchingChart(_ chart: Chart) {
+        
+    }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         

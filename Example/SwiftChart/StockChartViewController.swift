@@ -32,8 +32,8 @@ class StockChartViewController: UIViewController, ChartDelegate {
         // Initialize data series and labels
         let stockValues = getStockValues()
         
-        var serieData: Array<Float> = []
-        var labels: Array<Float> = []
+        var serieData: [Float] = []
+        var labels: [Float] = []
         var labelsAsString: Array<String> = []
         
         // Date formatter to retrieve the month names
@@ -106,6 +106,10 @@ class StockChartViewController: UIViewController, ChartDelegate {
     func didFinishTouchingChart(_ chart: Chart) {
         label.text = ""
         labelLeadingMarginConstraint.constant = labelLeadingMarginInitialConstant
+    }
+    
+    func didEndTouchingChart(_ chart: Chart) {
+        
     }
     
     
