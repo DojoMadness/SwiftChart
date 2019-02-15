@@ -695,7 +695,7 @@ open class Chart: UIControl {
         context.setStrokeColor(zeroXLineColor.cgColor)
         context.setLineWidth(zeroXLineWidth)
         
-        let zeroLevel: Float = series.count > 0 ? series[0].colors.zeroLevel : 0
+        let zeroLevel: Double = series.count > 0 ? series[0].colors.zeroLevel : 0
         let y = CGFloat(getZeroValueOnYAxis(zeroLevel: zeroLevel))
         context.move(to: CGPoint(x: CGFloat(0) + leftInset, y: y))
         context.addLine(to: CGPoint(x: CGFloat(drawingWidth) + leftInset, y: y))
@@ -711,7 +711,7 @@ open class Chart: UIControl {
     
     fileprivate func drawZeroXLabel(_ label: UILabel) {
         
-        let zeroLevel: Float = series.count > 0 ? series[0].colors.zeroLevel : 0
+        let zeroLevel: Double = series.count > 0 ? series[0].colors.zeroLevel : 0
         var frame = label.frame
         frame.origin.x = 0
         frame.origin.y = CGFloat(getZeroValueOnYAxis(zeroLevel: zeroLevel)) - (frame.height / 2)
